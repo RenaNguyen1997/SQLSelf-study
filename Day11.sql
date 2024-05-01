@@ -72,3 +72,69 @@ FROM pages as pp left join page_likes as pk
 on pp.page_id = pk. page_id
 where liked_date is NULL
 order by pp.page_id
+
+  --Question 8
+  select customer_id 
+from Customer 
+group by customer_id
+having count(distinct product_key) = (select count(product_key ) from Product)
+
+--Question 9
+with salary_s as (
+select *
+from Employees
+where salary < 30000
+),
+manager_s as(
+select mng. manager_id, em. employee_id
+from Employees mng left join Employees em on em.employee_id  = mng.manager_id  
+where mng.manager_id IS NOT NULL and em.employee_id is NULL
+)
+select distinct ss.employee_id 
+from salary_s ss join manager_s ms on ms. manager_id  = ss.manager_id 
+order by ss.employee_id 
+
+--Question 10
+WITH count_duplicate as(
+select
+  company_id,
+  title, 
+  description, 
+  count(job_id) as total_duplicate
+from job_listings   
+group by company_id, title, description
+)
+select count(company_id)
+from count_duplicate
+where total_duplicate >1
+
+--Question 11
+(select us.name as results
+from MovieRating mr join Users us on mr.user_id = us.user_id
+group by us.name
+order by count(mr.movie_id) DESC, us.name limit 1)
+
+UNION ALL
+
+(select mo.title as title
+from MovieRating mr join Movies mo on mr.movie_id= mo.movie_id
+where extract(year_month from mr.created_at) = 202002
+group by mo.title
+order by avg(mr.rating) DESC, mo.title ASC
+limit 1)
+
+--Question 12
+with calculate as(
+(select requester_id  as friend, accepter_id as friend_now
+from RequestAccepted)
+
+union all
+
+(select accepter_id, requester_id
+from RequestAccepted)
+)
+select friend as id, count(*) as num
+from calculate
+group by friend
+order by num desc   
+limit 1
