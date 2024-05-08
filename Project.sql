@@ -30,8 +30,14 @@ or priceeach is NULL
 or orderlinenumber is NULL
 or sales is NULL
 or orderdate is NULL
+-- Mình có dùng hàm trim() is Null để thử check nếu có cột nào bị blank không nhưng kết quả trả lại bị lỗi 
+--ERROR:  function pg_catalog.btrim(numeric) does not exist
+-- LINE 3: where TRIM(sales) is NULL
+--               ^
+-- HINT:  No function matches the given name and argument types. You might need to add explicit type casts. 
+-- Xem giúp mình và suggest giúp mình phương pháp khác khả thi hơn nhé! Thanks ạ 
 
---Question 3: Add firstname and lastanme column deriving from fullname
+-- --Question 3: Add firstname and lastanme column deriving from fullname
 Alter table sales_dataset_rfm_prj
 	add column contactlastname varchar(50),
 	add column contactfirtname varchar(50)
