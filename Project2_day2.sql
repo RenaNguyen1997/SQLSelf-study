@@ -1,6 +1,6 @@
 With revenue as (
 SELECT 
-  format_datetime('%Y-%m', oi.created_at) as yearmonth, 
+  format_datetime('%m', oi.created_at) as month, 
   format_datetime('%Y', oi.created_at) as Year,
   pr.category as Product_category,
   count(distinct oi.order_id) as TPO,
@@ -11,19 +11,20 @@ SELECT
 FROM `bigquery-public-data.thelook_ecommerce.order_items` as oi
 join bigquery-public-data.thelook_ecommerce.products as pr
 on oi.product_id = pr.id
-group by format_datetime('%Y', oi.created_at),format_datetime('%Y-%m', oi.created_at), pr.category
-order by Product_category, yearmonth
+group by format_datetime('%Y', oi.created_at),format_datetime('%m', oi.created_at), pr.category
+order by Product_category, Year, month
 )
+
 select
-  yearmonth,
+  month,
   year,
   Product_category, 
   TPV,
-  round((100*(TPV-lag(TPV) over(order by Product_category, yearmonth )))/TPV,2) || '%' as Revenue_growth,
+  COALESCE(round((100*(TPV-lag(TPV) over(partition by Product_category order by Product_category, year, month )))/TPV,2),0) || '%' as Revenue_growth,
   TPO,
-  round(100*((TPO- lag(TPO) over(order by Product_category, yearmonth ))/TPO),2) ||'%' as Order_growth,
+  COALESCE(round(100*((TPO- lag(TPO) over(partition by Product_category order by Product_category, year, month ))/TPO),2),0) ||'%' as Order_growth,
   Total_cost, 
   Total_profit,
   Profit_to_cost_ratio
 from revenue
-order by Product_category, yearmonth
+order by Product_category, year, month
