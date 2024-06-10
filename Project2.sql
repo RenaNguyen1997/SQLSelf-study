@@ -66,10 +66,22 @@ from bigquery-public-data.thelook_ecommerce.users
 where format_datetime('%Y-%m', created_at) between '2019-01' and '2022-04'
 ) as max_age_table
 where age = max_age
+
+UNION ALL
+
+select 
+  first_name,
+  last_name,
+  gender,
+  age,
+  "" as tag
+from bigquery-public-data.thelook_ecommerce.users
+where age <> 12 and age <> 70
 )
-select tag, gender, count(tag) as total
+select age, tag, gender, count(tag) as total
 from age_calculation
-group by tag, gender
+group by age, tag, gender
+order by age, gender
 
 
 -- Top 5 product generating highest revenue for each month
