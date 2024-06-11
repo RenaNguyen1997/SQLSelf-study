@@ -177,6 +177,22 @@ Select cohort_month,
 from customer_cohort
 
 
-
+--Table with summary information for visualization
+SELECT 
+  format_datetime('%Y-%m',t1.created_at) as order_time,
+  us.gender as gender,
+  count(distinct t1.user_id) as total_customer,
+  count(t1.order_id) as total_order,
+  round(sum(sale_price)/ count(t1.order_id),2) as avg_revenue,
+  round(sum(sale_price),2) as total_revenue
+from bigquery-public-data.thelook_ecommerce.orders as t1
+Join bigquery-public-data.thelook_ecommerce.order_items as t2 
+on t1.order_id=t2.order_id
+join bigquery-public-data.thelook_ecommerce.users as us
+on us.id = t1.user_id
+Where t1.status='Complete' and 
+t2.delivered_at BETWEEN '2019-01-01 00:00:00' AND '2022-05-01 00:00:00' 
+group by format_datetime('%Y-%m',t1.created_at), us.gender
+order by order_time, gender
 
 
