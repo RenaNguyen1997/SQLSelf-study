@@ -6,8 +6,7 @@ SELECT
 from bigquery-public-data.thelook_ecommerce.orders as t1
 Join bigquery-public-data.thelook_ecommerce.order_items as t2 
 on t1.order_id=t2.order_id
-Where t1.status='Complete' and 
-t2.delivered_at BETWEEN '2019-01-01 00:00:00' AND '2022-05-01 00:00:00' 
+Where t1.status='Complete' 
 group by format_datetime('%Y-%m',t1.created_at)
 order by order_time
 LIMIT 1000
@@ -17,10 +16,9 @@ LIMIT 1000
 select 
   format_datetime('%Y-%m', created_at) as order_time,  
   round(sum(sale_price)/ count(order_id),2) as avg_revenue,
-  count(distinct user_id) as total_customer  
+  round(sum(sale_price),2) as total_revenue 
 from bigquery-public-data.thelook_ecommerce.order_items
-where (not status in ('Returned', 'Processing', 'Cancelled'))
-  and (created_at BETWEEN '2019-01-01 00:00:00' AND '2022-05-01 00:00:00')
+where status='Complete'
 group by format_datetime('%Y-%m',created_at)
 order by order_time
 
