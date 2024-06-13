@@ -12,7 +12,7 @@ order by order_time
 LIMIT 1000
 -- Revenue and customer, in general, increase by time
   
---avg revenue and total customer each month
+--avg revenue per order and total revevenue 
 select 
   format_datetime('%Y-%m', created_at) as order_time,  
   round(sum(sale_price)/ count(order_id),2) as avg_revenue,
@@ -21,6 +21,35 @@ from bigquery-public-data.thelook_ecommerce.order_items
 where status='Complete'
 group by format_datetime('%Y-%m',created_at)
 order by order_time
+
+-- Total revenue and revenue growth rate by quarter and year
+
+with calculation as(
+select 
+  format_datetime('%Y-%m', created_at) as order_time, 
+  format_datetime('%Q', created_at) as quarter_time, 
+  format_datetime('%Y', created_at) as year,
+  round(sum(sale_price)/ count(order_id),2) as avg_revenue,
+  round(sum(sale_price),2) as total_revenue,
+from bigquery-public-data.thelook_ecommerce.order_items
+where status='Complete'
+group by format_datetime('%Y-%m',created_at), format_datetime('%Q', created_at), format_datetime('%Y', created_at)
+order by quarter_time, year
+), previous_revenue as(
+select
+  quarter_time,
+  year,
+  round(sum(total_revenue),2) as total_revenue,
+  lag(round(sum(total_revenue),2)) over (partition by quarter_time order by quarter_time, year) as previous_revenue  
+from calculation
+group by quarter_time, year
+order by quarter_time, year
+)
+select 
+  quarter_time, year, previous_revenue.total_revenue,
+  round(((previous_revenue.total_revenue - previous_revenue.previous_revenue)/previous_revenue.total_revenue) * 100,2) as growth_rate
+from previous_revenue
+order by quarter_time, year
 
 --Oldest and Youngest customer by gender from 1/2019 to 4/2022
   --Youngest: 12 years old (1010 in total with more F than M)
