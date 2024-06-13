@@ -130,10 +130,20 @@ select *,
   dense_rank() over (partition by yearmonth order by profit desc) as rank_product
 from product_revenue
 )
-select *
+select distinct
+  ranking.yearmonth,
+  ranking.product_id,
+  ranking. product_name,
+  ranking.cost,
+  ranking.sales,
+  ranking. profit,
+  ini.product_category,
+  ranking.rank_product
 from ranking
+join bigquery-public-data.thelook_ecommerce.inventory_items as ini
+on ranking.product_id = ini. product_id
 where ranking.rank_product<=5
-order by yearmonth, profit desc
+order by ranking.yearmonth, ranking.rank_product
 
 --Daily revenune by category in the last three months
 select 
