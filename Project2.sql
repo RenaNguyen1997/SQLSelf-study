@@ -1,4 +1,4 @@
--- Total customer and order in each month 
+-- Total customers and orders in each month 
 SELECT 
   format_datetime('%Y-%m',t1.created_at) as order_time,
   count(distinct t1.user_id) as total_customer,
@@ -10,9 +10,8 @@ Where t1.status='Complete'
 group by format_datetime('%Y-%m',t1.created_at)
 order by order_time
 LIMIT 1000
--- Revenue and customer, in general, increase by time
   
---avg revenue per order and total revevenue 
+--Average revenue per order and total revenue each month 
 select 
   format_datetime('%Y-%m', created_at) as order_time,  
   round(sum(sale_price)/ count(order_id),2) as avg_revenue,
